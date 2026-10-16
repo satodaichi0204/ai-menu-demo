@@ -1,9 +1,29 @@
 @import "tailwindcss";
 
+/* デザインの基本（日本の料理・健康アプリを参考に、温かみのあるクリーム、抹茶の緑、柿色を軸にする） */
+@theme {
+  --color-cream: #faf6ef;
+  --color-paper: #fffdf9;
+  --color-ink: #2b2622;
+  --color-matcha-50: #f1f6f1;
+  --color-matcha-100: #ddebe0;
+  --color-matcha-200: #bbd6c2;
+  --color-matcha-500: #4f8a63;
+  --color-matcha-600: #3e7350;
+  --color-matcha-700: #315c40;
+  --color-matcha-800: #284a35;
+  --color-kaki-50: #fdf3ec;
+  --color-kaki-100: #fbe3d2;
+  --color-kaki-400: #ee9157;
+  --color-kaki-500: #e3763a;
+  --color-kaki-600: #cc5f26;
+}
+
 @theme inline {
   --font-sans:
     "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", "Segoe UI", Meiryo, system-ui,
     sans-serif;
+  --font-display: var(--font-zen), "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif;
 }
 
 html {
@@ -11,6 +31,14 @@ html {
 }
 
 body {
-  background: #fafaf9;
-  color: #1c1917;
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+/* 横スクロールのつまみを隠す（曜日の選択など） */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

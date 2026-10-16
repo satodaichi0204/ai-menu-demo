@@ -125,15 +125,13 @@ export const LeafIcon = (p: IconProps) => (
 // 表示の部品
 // ---------------------------------------------------------------------------
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <section className={`rounded-2xl border border-stone-200 bg-white shadow-sm ${className}`}>{children}</section>
-  );
+  return <section className={`rounded-3xl bg-paper shadow-sm ring-1 ring-ink/5 ${className}`}>{children}</section>;
 }
 
 export function Tag({ children, tone = "stone" }: { children: ReactNode; tone?: "stone" | "green" | "red" | "amber" }) {
   const cls = {
-    stone: "bg-stone-100 text-stone-600",
-    green: "bg-emerald-50 text-emerald-700",
+    stone: "bg-cream text-ink/60",
+    green: "bg-matcha-50 text-matcha-700",
     red: "bg-rose-50 text-rose-700",
     amber: "bg-amber-50 text-amber-800",
   }[tone];
@@ -149,11 +147,7 @@ export function NutriChip({ label, value, ok }: { label: string; value: string; 
   return (
     <span
       className={`inline-flex items-baseline gap-1 whitespace-nowrap rounded-lg px-2 py-1 text-[11px] ${
-        ok === undefined
-          ? "bg-stone-100 text-stone-600"
-          : ok
-            ? "bg-emerald-50 text-emerald-800"
-            : "bg-amber-50 text-amber-800"
+        ok === undefined ? "bg-cream text-ink/60" : ok ? "bg-matcha-50 text-matcha-800" : "bg-amber-50 text-amber-800"
       }`}
     >
       <span className="text-[10px] opacity-80">{label}</span>
@@ -191,7 +185,7 @@ export function ChipGroup<T extends string>({
   tone?: "green" | "red";
 }) {
   const onCls =
-    tone === "red" ? "border-rose-600 bg-rose-600 text-white" : "border-emerald-600 bg-emerald-600 text-white";
+    tone === "red" ? "border-rose-600 bg-rose-600 text-white" : "border-matcha-600 bg-matcha-600 text-white";
   return (
     <div role="group" aria-label={label} className="flex flex-wrap gap-1.5">
       {options.map((o) => {
@@ -203,7 +197,7 @@ export function ChipGroup<T extends string>({
             aria-pressed={on}
             onClick={() => onChange(on ? value.filter((v) => v !== o.value) : [...value, o.value])}
             className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-              on ? onCls : "border-stone-200 bg-white text-stone-700 hover:border-emerald-300 hover:bg-emerald-50"
+              on ? onCls : "border-ink/10 bg-paper text-ink/75 hover:border-matcha-300 hover:bg-matcha-50"
             }`}
           >
             {o.label}
@@ -218,8 +212,8 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
   return (
     <div>
       <div className="mb-1.5 flex items-baseline gap-2">
-        <span className="text-sm font-semibold text-stone-700">{label}</span>
-        {hint && <span className="text-xs text-stone-400">{hint}</span>}
+        <span className="text-sm font-semibold text-ink/75">{label}</span>
+        {hint && <span className="text-xs text-ink/40">{hint}</span>}
       </div>
       {children}
     </div>
@@ -227,15 +221,15 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 }
 
 export const inputClass =
-  "h-11 w-full rounded-xl border border-stone-200 bg-white px-3.5 text-base text-stone-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100";
+  "h-11 w-full rounded-xl border border-ink/10 bg-paper px-3.5 text-base text-ink outline-none transition focus:border-matcha-500 focus:ring-4 focus:ring-matcha-100";
 
 export function Skeleton({ className = "" }: { className?: string }) {
-  return <div className={`animate-pulse rounded-2xl bg-stone-200/70 ${className}`} />;
+  return <div className={`animate-pulse rounded-2xl bg-ink/10 ${className}`} />;
 }
 
 export function DemoNote({ className = "" }: { className?: string }) {
   return (
-    <p className={`text-[11px] leading-relaxed text-stone-400 ${className}`}>
+    <p className={`text-[11px] leading-relaxed text-ink/40 ${className}`}>
       デモ版です。家族とレシピは架空のもので、栄養の値はデモ用の概算です。データはこの端末のブラウザにだけ保存されます。
     </p>
   );
@@ -246,4 +240,59 @@ const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
 export function formatDay(date: string): string {
   const d = new Date(`${date}T00:00:00Z`);
   return `${d.getUTCMonth() + 1}/${d.getUTCDate()}（${WEEKDAYS[d.getUTCDay()]}）`;
+}
+
+/**
+ * 栄養の目安に対する割合を、輪で表す（あすけんなどの健康アプリにならった表示）。
+ * kind="max" は上限（塩分など、少ないほどよい）、"min" は下限（野菜など、多いほどよい）。
+ */
+export function NutritionRing({
+  label,
+  value,
+  unit,
+  target,
+  kind,
+  size = 64,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  target: number;
+  kind: "max" | "min";
+  size?: number;
+}) {
+  const ratio = Math.min(1, value / target);
+  const ok = kind === "max" ? value <= target : value >= target;
+  const r = 26;
+  const c = 2 * Math.PI * r;
+  const color = ok ? "var(--color-matcha-500)" : "var(--color-kaki-500)";
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg viewBox="0 0 64 64" className="h-full w-full -rotate-90">
+          <circle cx="32" cy="32" r={r} fill="none" stroke="var(--color-ink)" strokeOpacity="0.07" strokeWidth="6" />
+          <circle
+            cx="32"
+            cy="32"
+            r={r}
+            fill="none"
+            stroke={color}
+            strokeWidth="6"
+            strokeLinecap="round"
+            strokeDasharray={`${c * ratio} ${c}`}
+          />
+        </svg>
+        <span className="absolute inset-0 grid place-items-center text-center leading-none">
+          <span>
+            <span className="block text-sm font-bold tabular-nums">{value}</span>
+            <span className="block text-[9px] text-ink/50">{unit}</span>
+          </span>
+        </span>
+      </div>
+      <span className="text-[11px] font-medium text-ink/70">{label}</span>
+      <span className={`text-[10px] ${ok ? "text-matcha-700" : "text-kaki-600"}`}>
+        {kind === "max" ? `目安${target}${unit}以下` : `目安${target}${unit}以上`}
+      </span>
+    </div>
+  );
 }

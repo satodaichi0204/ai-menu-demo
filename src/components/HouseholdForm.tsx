@@ -52,8 +52,8 @@ function Form({ initial }: { initial: Household }) {
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">家族の設定</h1>
-        <p className="text-sm text-stone-500">
+        <h1 className="font-display text-2xl font-bold md:text-3xl">家族の設定</h1>
+        <p className="text-sm text-ink/50">
           一人ひとりの年代、健康の目標、アレルギー、苦手な食材から、献立を考えます。
         </p>
       </div>
@@ -68,14 +68,14 @@ function Form({ initial }: { initial: Household }) {
           />
         </Field>
         <Field label="平日の夕食にかけられる時間" hint="主菜の調理時間の上限">
-          <div className="inline-flex rounded-xl bg-stone-100 p-1">
+          <div className="inline-flex rounded-xl bg-cream p-1">
             {MINUTES.map((m) => (
               <button
                 key={m}
                 type="button"
                 onClick={() => setDraft({ ...draft, cookingMinutes: m })}
                 aria-pressed={draft.cookingMinutes === m}
-                className={`rounded-lg px-4 py-1.5 text-sm font-semibold ${draft.cookingMinutes === m ? "bg-white text-emerald-700 shadow-sm" : "text-stone-500"}`}
+                className={`rounded-lg px-4 py-1.5 text-sm font-semibold ${draft.cookingMinutes === m ? "bg-paper text-matcha-700 shadow-sm" : "text-ink/50"}`}
               >
                 {m}分
               </button>
@@ -87,12 +87,17 @@ function Form({ initial }: { initial: Household }) {
       {draft.members.map((m, idx) => (
         <Card key={m.id} className="space-y-4 p-5">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-bold text-stone-500">家族 {idx + 1}</h2>
+            <h2 className="flex items-center gap-2.5">
+              <span className="grid h-10 w-10 place-items-center rounded-full bg-matcha-100 font-display text-base font-bold text-matcha-800">
+                {m.name.slice(0, 1) || idx + 1}
+              </span>
+              <span className="font-display text-base font-bold">{m.name || `家族 ${idx + 1}`}</span>
+            </h2>
             {draft.members.length > 1 && (
               <button
                 type="button"
                 onClick={() => setDraft((h) => ({ ...h, members: h.members.filter((x) => x.id !== m.id) }))}
-                className="inline-flex items-center gap-1 text-xs font-medium text-stone-400 hover:text-rose-600"
+                className="inline-flex items-center gap-1 text-xs font-medium text-ink/40 hover:text-rose-600"
               >
                 <CloseIcon className="h-4 w-4" />
                 削除
@@ -157,7 +162,7 @@ function Form({ initial }: { initial: Household }) {
               ],
             }))
           }
-          className="flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-stone-300 py-4 text-sm font-semibold text-stone-500 hover:border-emerald-400 hover:text-emerald-700"
+          className="flex w-full items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-ink/15 py-4 text-sm font-semibold text-ink/50 hover:border-matcha-400 hover:text-matcha-700"
         >
           <PlusIcon className="h-5 w-5" />
           家族を追加
@@ -165,7 +170,7 @@ function Form({ initial }: { initial: Household }) {
       )}
 
       <Card className="sticky bottom-20 space-y-2 p-4 md:bottom-4">
-        <p className={`text-xs ${tooFew ? "text-rose-700" : "text-stone-500"}`}>
+        <p className={`text-xs ${tooFew ? "text-rose-700" : "text-ink/50"}`}>
           この条件で使える料理：主菜{counts.main}品、副菜{counts.side}品、汁物{counts.soup}品
           {tooFew && "。少なすぎるため、同じ料理が続くか、献立を作れないことがあります"}
         </p>
@@ -175,7 +180,7 @@ function Form({ initial }: { initial: Household }) {
             type="button"
             onClick={save}
             disabled={s.generating}
-            className="h-11 flex-1 rounded-xl bg-emerald-600 font-bold text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-700 disabled:opacity-60"
+            className="h-11 flex-1 rounded-xl bg-matcha-600 font-bold text-white shadow-lg shadow-matcha-600/25 hover:bg-matcha-700 disabled:opacity-60"
           >
             {s.generating ? "献立を考えています…" : "保存して献立を作り直す"}
           </button>
@@ -187,7 +192,7 @@ function Form({ initial }: { initial: Household }) {
                 router.push("/plan");
               }
             }}
-            className="h-11 rounded-xl border border-stone-200 bg-white px-3 text-xs font-semibold text-stone-500 hover:bg-stone-50"
+            className="h-11 rounded-xl border border-ink/10 bg-paper px-3 text-xs font-semibold text-ink/50 hover:bg-cream"
           >
             デモを初期状態に戻す
           </button>
@@ -237,7 +242,7 @@ function DislikeInput({ value, onChange }: { value: string[]; onChange: (v: stri
         <button
           type="button"
           onClick={add}
-          className="rounded-xl border border-stone-200 px-4 text-sm font-semibold text-stone-600 hover:bg-stone-50"
+          className="rounded-xl border border-ink/10 px-4 text-sm font-semibold text-ink/60 hover:bg-cream"
         >
           追加
         </button>

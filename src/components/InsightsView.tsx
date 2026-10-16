@@ -74,14 +74,14 @@ export default function InsightsView() {
     <div className="mx-auto max-w-5xl space-y-5 p-4 md:p-6">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold text-emerald-700">サービスの検証（運営者向け）</p>
-          <h1 className="text-2xl font-bold tracking-tight">モニター検証</h1>
-          <p className="text-sm text-stone-500">献立が実際に作られ、家族に受け入れられたかを確かめるための画面です。</p>
+          <p className="text-xs font-semibold text-matcha-700">サービスの検証（運営者向け）</p>
+          <h1 className="font-display text-2xl font-bold md:text-3xl">モニター検証</h1>
+          <p className="text-sm text-ink/50">献立が実際に作られ、家族に受け入れられたかを確かめるための画面です。</p>
         </div>
         <button
           type="button"
           onClick={exportCsv}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-ink/10 bg-paper px-3 py-2 text-sm font-semibold text-ink/75 hover:bg-cream"
         >
           <DownloadIcon className="h-4 w-4" />
           CSVで書き出す
@@ -95,15 +95,15 @@ export default function InsightsView() {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {kpis.map((k) => (
           <Card key={k.label} className="p-4">
-            <p className="text-xs font-medium text-stone-500">{k.label}</p>
+            <p className="text-xs font-medium text-ink/50">{k.label}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums">{k.value}</p>
-            <p className="text-[11px] text-stone-400">{k.sub}</p>
+            <p className="text-[11px] text-ink/40">{k.sub}</p>
           </Card>
         ))}
       </div>
 
       <Card className="p-5">
-        <h2 className="text-base font-bold">栄養の目安を満たした日（夕食1回・大人1人分）</h2>
+        <h2 className="font-display text-base font-bold">栄養の目安を満たした日（夕食1回・大人1人分）</h2>
         <div className="mt-3 space-y-3">
           {[
             { label: `塩分 ${stats.targets.saltMax}g以下`, n: stats.salt },
@@ -117,8 +117,8 @@ export default function InsightsView() {
                   {x.n}／{stats.days}日
                 </span>
               </div>
-              <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-stone-100">
-                <div className="h-full rounded-full bg-emerald-500" style={{ width: `${pct(x.n, stats.days)}%` }} />
+              <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-cream">
+                <div className="h-full rounded-full bg-matcha-500" style={{ width: `${pct(x.n, stats.days)}%` }} />
               </div>
             </div>
           ))}
@@ -127,8 +127,8 @@ export default function InsightsView() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="p-5">
-          <h2 className="flex items-center gap-1.5 text-base font-bold">
-            <ThumbUpIcon className="h-5 w-5 text-emerald-600" />
+          <h2 className="flex items-center gap-1.5 font-display text-base font-bold">
+            <ThumbUpIcon className="h-5 w-5 text-matcha-600" />
             好評の料理
           </h2>
           {stats.good.length ? (
@@ -138,11 +138,11 @@ export default function InsightsView() {
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm text-stone-400">献立の料理の右にある、上向きの手のボタンで記録できます。</p>
+            <p className="mt-2 text-sm text-ink/40">献立の料理の右にある、上向きの手のボタンで記録できます。</p>
           )}
         </Card>
         <Card className="p-5">
-          <h2 className="flex items-center gap-1.5 text-base font-bold">
+          <h2 className="flex items-center gap-1.5 font-display text-base font-bold">
             <ThumbDownIcon className="h-5 w-5 text-rose-500" />
             不評の料理
           </h2>
@@ -153,24 +153,24 @@ export default function InsightsView() {
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm text-stone-400">不評をつけた料理は、次に献立を作るときに出にくくなります。</p>
+            <p className="mt-2 text-sm text-ink/40">不評をつけた料理は、次に献立を作るときに出にくくなります。</p>
           )}
         </Card>
       </div>
 
       <Card className="p-5">
-        <h2 className="text-base font-bold">家族のメモ</h2>
+        <h2 className="font-display text-base font-bold">家族のメモ</h2>
         {stats.notes.length ? (
-          <ul className="mt-2 divide-y divide-stone-100 text-sm">
+          <ul className="mt-2 divide-y divide-ink/5 text-sm">
             {stats.notes.map((n) => (
               <li key={n.date} className="flex gap-3 py-2">
-                <span className="shrink-0 text-stone-400">{formatDay(n.date)}</span>
+                <span className="shrink-0 text-ink/40">{formatDay(n.date)}</span>
                 {n.text}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-2 text-sm text-stone-400">献立の各日の下にある「ひとことメモ」が、ここに集まります。</p>
+          <p className="mt-2 text-sm text-ink/40">献立の各日の下にある「ひとことメモ」が、ここに集まります。</p>
         )}
       </Card>
       <DemoNote />

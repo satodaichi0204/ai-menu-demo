@@ -36,21 +36,21 @@ export default function ShoppingView() {
     <div className="mx-auto max-w-3xl space-y-4 p-4 md:p-6">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">買い物リスト</h1>
-          <p className="text-sm text-stone-500">
+          <h1 className="font-display text-2xl font-bold md:text-3xl">買い物リスト</h1>
+          <p className="text-sm text-ink/50">
             献立の材料を合計し、{servings}人分に換算しました。
-            <Link href="/plan" className="ml-1 text-emerald-700 hover:underline">
+            <Link href="/plan" className="ml-1 text-matcha-700 hover:underline">
               献立を見る
             </Link>
           </p>
         </div>
-        <p className="text-sm font-semibold text-stone-600">
-          <span className="text-2xl font-bold text-emerald-700">{done}</span>／{items.length}品
+        <p className="text-sm font-semibold text-ink/60">
+          <span className="text-2xl font-bold text-matcha-700">{done}</span>／{items.length}品
         </p>
       </div>
 
       <Card className="p-4">
-        <p className="mb-2 text-xs font-semibold text-stone-500">買う日の分を選ぶ</p>
+        <p className="mb-2 text-xs font-semibold text-ink/50">買う日の分を選ぶ</p>
         <div className="flex flex-wrap gap-1.5">
           {s.plan.days.map((d, i) => {
             const on = days === null || days.includes(i);
@@ -60,7 +60,7 @@ export default function ShoppingView() {
                 type="button"
                 onClick={() => toggleDay(i)}
                 aria-pressed={on}
-                className={`rounded-full border px-3 py-1 text-xs font-medium ${on ? "border-emerald-600 bg-emerald-600 text-white" : "border-stone-200 bg-white text-stone-600"}`}
+                className={`rounded-full border px-3 py-1 text-xs font-medium ${on ? "border-matcha-600 bg-matcha-600 text-white" : "border-ink/10 bg-paper text-ink/60"}`}
               >
                 {formatDay(d.date)}
               </button>
@@ -70,7 +70,7 @@ export default function ShoppingView() {
             <button
               type="button"
               onClick={s.clearChecked}
-              className="ml-auto text-xs font-medium text-stone-500 underline"
+              className="ml-auto text-xs font-medium text-ink/50 underline"
             >
               チェックをすべて外す
             </button>
@@ -80,11 +80,11 @@ export default function ShoppingView() {
 
       {groups.map(([cat, list]) => (
         <Card key={cat} className="overflow-hidden">
-          <h2 className="border-b border-stone-100 bg-stone-50 px-4 py-2 text-xs font-bold text-stone-500">
+          <h2 className="border-b border-ink/5 bg-cream px-4 py-2 text-xs font-bold text-ink/50">
             {ING_CATEGORIES[cat]}
             {cat === "seasoning" && <span className="ml-2 font-normal">家にあるものは不要です</span>}
           </h2>
-          <ul className="divide-y divide-stone-100">
+          <ul className="divide-y divide-ink/5">
             {list.map((x) => {
               const on = s.checked.includes(x.key);
               return (
@@ -92,19 +92,19 @@ export default function ShoppingView() {
                   <button
                     type="button"
                     onClick={() => s.toggleChecked(x.key)}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-stone-50"
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-cream"
                   >
                     <span
-                      className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border ${on ? "border-emerald-600 bg-emerald-600 text-white" : "border-stone-300 bg-white"}`}
+                      className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border ${on ? "border-matcha-600 bg-matcha-600 text-white" : "border-ink/15 bg-paper"}`}
                     >
                       {on && <CheckIcon className="h-3.5 w-3.5" />}
                     </span>
-                    <span className={`min-w-0 flex-1 ${on ? "text-stone-400 line-through" : ""}`}>
+                    <span className={`min-w-0 flex-1 ${on ? "text-ink/40 line-through" : ""}`}>
                       <span className="block text-sm font-medium">{x.name}</span>
-                      <span className="block truncate text-[11px] text-stone-400">{x.usedIn.join("、")}</span>
+                      <span className="block truncate text-[11px] text-ink/40">{x.usedIn.join("、")}</span>
                     </span>
                     <span
-                      className={`shrink-0 text-sm tabular-nums ${on ? "text-stone-400" : "font-semibold text-stone-700"}`}
+                      className={`shrink-0 text-sm tabular-nums ${on ? "text-ink/40" : "font-semibold text-ink/75"}`}
                     >
                       {formatAmount(x.amount, x.unit)}
                     </span>
