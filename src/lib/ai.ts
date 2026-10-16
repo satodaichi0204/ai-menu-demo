@@ -22,6 +22,11 @@ import { RECIPE_BY_ID } from "./recipes.ts";
 
 export const AI_MODEL = "claude-opus-5-5";
 
+/** Claude Opus 5.5 の料金（100万トークンあたり、入力 $4・出力 $20）で、1回の費用を見積もる */
+export function estimateCostUsd(usage: { input_tokens: number; output_tokens: number }): number {
+  return (usage.input_tokens * 4 + usage.output_tokens * 20) / 1_000_000;
+}
+
 const AiPlanSchema = z.object({
   days: z.array(
     z.object({
@@ -43,7 +48,9 @@ const SYSTEM = `あなたは、家族の健康を毎日の夕食から整える�
 - 同じ主菜を1週間に2回使わない。前日と同じ種類のたんぱく質（鶏肉、魚など）の主菜が続かないようにする。
 - 副菜と汁物も、できるだけ同じ料理を繰り返さない。主菜と和洋中を合わせる。
 - 家族が「好評」とした料理は入れやすく、「不評」とした料理は使わない。
-- 候補はすでにアレルギーと調理時間で絞り込み済みです。候補にないIDは使わないでください。`;
+- 候補はすでにアレルギーと調理時間で絞り込み済みです。候補にないIDは使わないでください。
+- 理由には、家族の情報（年代、目標、苦手、評価）と候補の数値にあることだけを書く。好みや体調など、書かれていないことを推測して書かない。
+- 家族の名前には「さん」をつける（例：ふみさん）。`;
 
 function recipeLine(r: Recipe): string {
   const flags = [r.soft && "やわらかい", r.kid && "子ども向け", r.iron && "鉄分", r.calcium && "カルシウム"]
@@ -90,16 +97,18 @@ ${candidates(p, "soup").map(recipeLine).join("\n")}`;
 
 export async function planWithClaude(
   h: Household,
-  opts: { start: string; seed: number; feedback?: Feedback },
+  opts: { start: string; seed: number; feedback?: Feedback; onCost?: (usd: number) => void },
 ): Promise<Plan> {
   const client = new Anthropic();
   const response = await client.messages.parse({
     model: AI_MODEL,
     max_tokens: 16000,
     system: SYSTEM,
-    output_config: { effort: "medium", format: zodOutputFormat(AiPlanSchema) },
+    // 献立の選択は「low」でも質が保てることを確認済み（medium の約半分の時間と費用）
+    output_config: { effort: "low", format: zodOutputFormat(AiPlanSchema) },
     messages: [{ role: "user", content: buildPrompt(h, opts.feedback) }],
   });
+  opts.onCost?.(estimateCostUsd(response.usage));
   if (response.stop_reason === "refusal") throw new Error("AI が献立の作成を見送りました");
   const out = response.parsed_output;
   if (!out) throw new Error("AI の回答を読み取れませんでした");

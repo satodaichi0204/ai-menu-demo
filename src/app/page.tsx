@@ -244,7 +244,7 @@ export default function Home() {
           <SparklesIcon className="h-7 w-7 text-kaki-400" />
           <h2 className="mt-3 font-display text-xl font-bold">AIが選び、理由を説明</h2>
           <p className="mt-2 text-sm leading-relaxed text-cream/70">
-            AI（Claude）が家族の目標と評価を読み取り、候補の中から献立を選んで、その理由を言葉で説明します。このデモはAIの代わりにルールで組み立てるモードで公開しています。
+            AI（Claude）が家族の目標と評価を読み取り、候補の中から献立を選んで、その理由を言葉で説明します。献立の画面の「AIに献立を考えてもらう」で、実際にAIが献立を作ります（デモでは1日3回まで）。
           </p>
         </div>
         <div className="rounded-3xl bg-matcha-700 p-7 text-white">

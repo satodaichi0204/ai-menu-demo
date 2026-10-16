@@ -23,6 +23,7 @@ const goodDays = [
 ].map(([main, side, soup]) => ({ main, side, soup, reason: "テストの理由" }));
 const reply = (days = goodDays, stop = "end_turn") => ({
   stop_reason: stop,
+  usage: { input_tokens: 4000, output_tokens: 1800 },
   parsed_output: { days, summary: "テストのまとめ" },
 });
 

@@ -9,15 +9,20 @@ import { EMPTY_FEEDBACK, SAMPLE_HOUSEHOLD } from "./sample";
 
 const KEY = "totonoe-kondate:v1";
 
+export type AiStatus = { enabled: boolean; remaining: number; perDay: number; budgetLeft: boolean };
+
 type Saved = { household: Household; plan: Plan | null; feedback: Feedback; checked: string[] };
 
 type Store = Saved & {
   ready: boolean;
   generating: boolean;
+  /** AI で作っている最中か（進み具合の表示に使う） */
+  generatingAi: boolean;
+  ai: AiStatus | null;
   note: string | null;
   error: string | null;
   setHousehold: (h: Household) => void;
-  generate: (opts?: { reseed?: boolean; household?: Household; feedback?: Feedback }) => Promise<void>;
+  generate: (opts?: { reseed?: boolean; household?: Household; feedback?: Feedback; ai?: boolean }) => Promise<void>;
   swap: (dayIndex: number, course: Course) => void;
   rate: (recipeId: string, rating: Rating) => void;
   toggleCooked: (date: string) => void;
@@ -53,6 +58,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   });
   const [ready, setReady] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [generatingAi, setGeneratingAi] = useState(false);
+  const [ai, setAi] = useState<AiStatus | null>(null);
+
+  // AI が使えるか、今日あと何回使えるか
+  useEffect(() => {
+    fetch("/api/plan")
+      .then((r) => r.json())
+      .then(setAi)
+      .catch(() => setAi(null));
+  }, []);
   const [note, setNoteMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -82,8 +97,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [state, ready]);
 
   const generate = useCallback(
-    async (opts?: { reseed?: boolean; household?: Household; feedback?: Feedback }) => {
+    async (opts?: { reseed?: boolean; household?: Household; feedback?: Feedback; ai?: boolean }) => {
       setGenerating(true);
+      setGeneratingAi(!!opts?.ai);
       setError(null);
       setNoteMsg(null);
       const household = opts?.household ?? state.household;
@@ -93,16 +109,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const res = await fetch("/api/plan", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ household, start: todayLocal(), seed, feedback }),
+          body: JSON.stringify({ household, start: todayLocal(), seed, feedback, ai: !!opts?.ai }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? "献立を作れませんでした");
         setState((s) => ({ ...s, household, plan: data.plan, checked: [] }));
         setNoteMsg(data.note);
+        if (data.status) setAi(data.status);
       } catch (e) {
         setError((e as Error).message);
       } finally {
         setGenerating(false);
+        setGeneratingAi(false);
       }
     },
     [state.household, state.plan, state.feedback],
@@ -117,6 +135,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       ...state,
       ready,
       generating,
+      generatingAi,
+      ai,
       note,
       error,
       setHousehold: (household) => setState((s) => ({ ...s, household })),
@@ -148,7 +168,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         void generateRef.current({ household: SAMPLE_HOUSEHOLD, feedback: EMPTY_FEEDBACK, reseed: true });
       },
     }),
-    [state, ready, generating, note, error, generate],
+    [state, ready, generating, generatingAi, ai, note, error, generate],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

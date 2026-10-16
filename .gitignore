@@ -42,3 +42,8 @@ yarn-error.log*
 next-env.d.ts
 
 
+
+# 鍵などの秘密のファイルを、誤って公開リポジトリに入れない
+api key
+*.pem
+id_*

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AGE_GROUPS, COURSES, GOALS, type Course, type DayPlan } from "@/lib/domain";
 import { dayTotals, dinnerTargets, profileOf } from "@/lib/planner";
 import { RECIPE_BY_ID } from "@/lib/recipes";
@@ -81,15 +81,15 @@ export default function PlanView() {
             </Link>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {plan?.mode === "ai" ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-3 py-1.5 text-xs font-bold text-violet-800">
               <SparklesIcon className="h-3.5 w-3.5" />
-              AIが選びました
+              AIが選んだ献立
             </span>
           ) : (
             <span className="rounded-full bg-kaki-50 px-3 py-1.5 text-xs font-bold text-kaki-600 ring-1 ring-kaki-100">
-              デモモード
+              ルールで組み立てた献立
             </span>
           )}
           <button
@@ -99,13 +99,36 @@ export default function PlanView() {
               void s.generate({ reseed: true });
             }}
             disabled={s.generating}
-            className="inline-flex items-center gap-2 rounded-full bg-matcha-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-matcha-700/20 transition hover:bg-matcha-700 disabled:opacity-60"
+            className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold transition disabled:opacity-60 ${
+              s.ai?.enabled
+                ? "bg-paper text-ink ring-1 ring-ink/10 hover:ring-ink/20"
+                : "bg-matcha-600 text-white shadow-lg shadow-matcha-700/20 hover:bg-matcha-700"
+            }`}
           >
-            <RefreshIcon className={`h-4 w-4 ${s.generating ? "animate-spin" : ""}`} />
-            {s.generating ? "考えています…" : "作り直す"}
+            <RefreshIcon className={`h-4 w-4 ${s.generating && !s.generatingAi ? "animate-spin" : ""}`} />
+            {s.ai?.enabled ? "ルールで作り直す" : s.generating ? "考えています…" : "作り直す"}
           </button>
+          {s.ai?.enabled && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelected(null);
+                void s.generate({ reseed: true, ai: true });
+              }}
+              disabled={s.generating || s.ai.remaining <= 0}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 to-matcha-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-700/25 transition hover:brightness-110 disabled:opacity-50"
+            >
+              <SparklesIcon className="h-4 w-4" />
+              AIに献立を考えてもらう
+              <span className="rounded-full bg-white/20 px-2 py-0.5 text-[11px]">
+                {s.ai.remaining > 0 ? `今日あと${s.ai.remaining}回` : "今日は終了"}
+              </span>
+            </button>
+          )}
         </div>
       </div>
+
+      {s.generatingAi && <AiProgress />}
 
       {s.note && <p className="rounded-2xl bg-kaki-50 px-4 py-3 text-xs text-kaki-600">{s.note}</p>}
       {s.error && (
@@ -200,7 +223,10 @@ export default function PlanView() {
             {plan.mode !== "ai" && (
               <p className="mt-4 flex items-start gap-2 rounded-2xl bg-cream px-4 py-3 text-xs leading-relaxed text-ink/60">
                 <SparklesIcon className="mt-0.5 h-4 w-4 shrink-0 text-violet-500" />
-                このデモでは、AIの代わりにルールで献立を組み立てています。サーバーにAI（Claude）のAPIキーを設定すると、AIが家族の目標と評価を読み取って献立を選び、理由を説明します。どちらの場合も、アレルギーの除外と栄養の計算はプログラムで行います。
+                {s.ai?.enabled
+                  ? `この献立はルールで組み立てたものです。上の「AIに献立を考えてもらう」を押すと、AI（Claude）が家族の目標と評価を読み取って献立を選び、理由を説明します（デモでは1日${s.ai.perDay}回まで）。`
+                  : "この献立はルールで組み立てたものです。AI（Claude）を有効にすると、AIが家族の目標と評価を読み取って献立を選び、理由を説明します。"}
+                どちらの場合も、アレルギーの除外と栄養の計算はプログラムで行います。
               </p>
             )}
           </section>
@@ -390,5 +416,59 @@ function DayDetail({
         </div>
       </div>
     </section>
+  );
+}
+
+const AI_STEPS = [
+  "家族の目標と苦手を読み取っています",
+  "候補の料理を比べています",
+  "1日ごとの塩分と野菜を確かめています",
+  "選んだ理由をまとめています",
+];
+
+/** AI が考えている間（20秒ほど）の進み具合 */
+function AiProgress() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setStep((n) => Math.min(n + 1, AI_STEPS.length - 1)), 5000);
+    return () => clearInterval(timer);
+  }, []);
+  return (
+    <div
+      className="overflow-hidden rounded-3xl bg-gradient-to-r from-violet-50 to-matcha-50 p-5 ring-1 ring-violet-100"
+      role="status"
+    >
+      <div className="flex items-center gap-3">
+        <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-violet-600 text-white">
+          <span className="absolute inset-0 animate-ping rounded-full bg-violet-400 opacity-40" />
+          <SparklesIcon className="relative h-5 w-5" />
+        </span>
+        <div>
+          <p className="font-display text-base font-bold text-violet-900">AIが献立を考えています（20秒ほど）</p>
+          <p className="text-xs text-violet-800/70">アレルギーの除外と栄養の計算は、プログラムが行っています</p>
+        </div>
+      </div>
+      <ol className="mt-4 grid gap-2 text-xs md:grid-cols-4">
+        {AI_STEPS.map((x, i) => (
+          <li
+            key={x}
+            className={`flex items-center gap-2 rounded-xl px-3 py-2 transition ${
+              i < step
+                ? "bg-paper text-matcha-700"
+                : i === step
+                  ? "bg-paper font-bold text-violet-800 shadow-sm"
+                  : "text-ink/35"
+            }`}
+          >
+            {i < step ? (
+              <CheckIcon className="h-4 w-4 shrink-0" />
+            ) : (
+              <span className="h-4 w-4 shrink-0 rounded-full border-2 border-current" />
+            )}
+            {x}
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
